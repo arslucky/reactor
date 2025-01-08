@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="ars">
+        <createTable tableName="student">
+            <column name="id" type="long">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar2(100)"/>
+            <column name="age" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="ars">
+        <insert tableName="student">
+            <column name="id" value="1"/>
+            <column name="name" value="John"/>
+            <column name="age" value="23"/>
+        </insert>
+        <insert tableName="student">
+            <column name="id" value="2"/>
+            <column name="name" value="David"/>
+            <column name="age" value="29"/>
+        </insert>
+        <insert tableName="student">
+            <column name="id" value="3"/>
+            <column name="name" value="Simon"/>
+            <column name="age" value="35"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
