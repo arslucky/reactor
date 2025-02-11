@@ -1,6 +1,7 @@
 package org.ars.example.reactor.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.ars.example.reactor.entity.Student;
 import org.ars.example.reactor.repository.StudentRepository;
 import org.springframework.core.env.Environment;
@@ -15,6 +16,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Log4j2
 @RestController
 @RequestMapping("/students")
 @AllArgsConstructor
@@ -31,8 +33,8 @@ public class StudentController {
 
     @GetMapping(value = "getAllStudents")
     public Flux<Student> getAllStudents() {
-        var students = studentRepository.findAll();
-        return Flux.fromIterable(students);
+        log.info("getAllStudents");
+        return Flux.fromIterable(studentRepository.findAll());
     }
     @GetMapping("callClient")
     public void callClient() {
