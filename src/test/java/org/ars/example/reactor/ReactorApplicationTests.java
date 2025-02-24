@@ -3,8 +3,11 @@ package org.ars.example.reactor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.Subscription;
 import org.springframework.boot.test.context.SpringBootTest;
+import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.SignalType;
 import reactor.core.scheduler.Schedulers;
 
 @Log4j2
@@ -69,5 +72,41 @@ class ReactorApplicationTests {
         Thread.sleep(1500L);
         disposable.dispose();
         Thread.sleep(2000L);
+    }
+
+    @Test
+    void baseSubscriber () {
+        class SimpleSubscriber extends BaseSubscriber<Integer> {
+            @Override
+            protected void hookOnSubscribe(Subscription subscription) {
+                log.info("subscribed");
+                request(1L);
+            }
+
+            @Override
+            protected void hookOnNext(Integer value) {
+                log.info(value);
+                if(value>2) {
+                    log.info("canceling after having received: {}", value);
+                    cancel();
+                }
+                request(1);
+            }
+
+            @Override
+            protected void hookOnComplete() {
+                log.info("completed");
+            }
+
+            @Override
+            protected void hookFinally(SignalType type) {
+                log.info("finaled, signalType: {}", type);
+            }
+        }
+
+        var flux = Flux.range(1,4);
+        flux
+            .doOnRequest(r -> log.info("request of {}", r))
+            .subscribe(new SimpleSubscriber());
     }
 }
