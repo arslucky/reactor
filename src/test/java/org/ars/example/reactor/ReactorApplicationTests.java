@@ -58,13 +58,14 @@ class ReactorApplicationTests {
     @Test
     void dispose() {
         var publisher = Flux.range(1, 5)
-                .map(i -> {
+                .handle((i, sink) -> {
                     try {
                         Thread.sleep(500L);
                     } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                        sink.error(new RuntimeException(e));
+                        return;
                     }
-                    return i;
+                    sink.next(i);
                 });
         var disposable = publisher
                 .subscribeOn(Schedulers.boundedElastic())
