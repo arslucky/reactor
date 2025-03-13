@@ -12,6 +12,7 @@ import reactor.core.publisher.SignalType;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -197,5 +198,60 @@ class ReactorApplicationTests {
                 sink.next(n);
             });
         }
+    }
+
+    @Test
+    void onRequest() {
+        Flux<Integer> flux = Flux.create(sink -> {
+            var arr = new Integer[] {1,2,3,4,5};
+
+            var counter = new AtomicInteger();
+            sink.onRequest(countOfRequestedItems -> {
+                log.info("producer: requested of items: {}", countOfRequestedItems);
+                for(var i = 1; i <= countOfRequestedItems; i++) {
+                    if (counter.get() >= arr.length) {
+                        log.info("producer: sent complete signal");
+                        sink.complete();
+                        break;
+                    }
+                    log.info("producer: emitted: {}", arr[counter.get()]);
+                    sink.next(arr[counter.getAndIncrement()]);
+                }
+            });
+        });
+
+        class SimpleSubscriber extends BaseSubscriber<Integer> {
+            AtomicInteger requested = new AtomicInteger();
+            int batchSize = 3;
+            @Override
+            protected void hookOnSubscribe(Subscription subscription) {
+                log.info("consumer: subscribed");
+                requested.set(1);
+                request(requested.get());
+            }
+
+            @Override
+            protected void hookOnNext(Integer value) {
+                log.info("consumer: got {}", value);
+                if (requested.getAndDecrement() <= 1) {
+                    requested.set(batchSize);
+                    request(requested.get());
+                }
+            }
+
+            @Override
+            protected void hookOnComplete() {
+                log.info("consumer: completed");
+            }
+
+            @Override
+            protected void hookFinally(SignalType type) {
+                log.info("consumer: finaled, signalType: {}", type);
+            }
+        }
+
+        flux
+            .doOnRequest(r -> log.info("consumer: request of {} items", r))
+            .subscribe(new SimpleSubscriber());
     }
 }
