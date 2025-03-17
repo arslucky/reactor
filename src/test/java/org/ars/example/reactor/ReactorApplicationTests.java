@@ -203,7 +203,11 @@ class ReactorApplicationTests {
     @Test
     void onRequest() {
         Flux<Integer> flux = Flux.create(sink -> {
-            var arr = new Integer[] {1,2,3,4,5};
+            IntStream.range(0,3).forEach(emitItem -> {
+                log.info("producer: emitted: {}", emitItem);
+                sink.next(emitItem);
+            });
+            var arr = new Integer[] {10,20,30,40,50};
 
             var counter = new AtomicInteger();
             sink.onRequest(countOfRequestedItems -> {
@@ -219,17 +223,15 @@ class ReactorApplicationTests {
                 }
             });
         });
-
         class SimpleSubscriber extends BaseSubscriber<Integer> {
-            AtomicInteger requested = new AtomicInteger();
-            int batchSize = 3;
+            final AtomicInteger requested = new AtomicInteger();
+            final int batchSize = 3;
             @Override
             protected void hookOnSubscribe(Subscription subscription) {
                 log.info("consumer: subscribed");
                 requested.set(1);
                 request(requested.get());
             }
-
             @Override
             protected void hookOnNext(Integer value) {
                 log.info("consumer: got {}", value);
@@ -238,12 +240,10 @@ class ReactorApplicationTests {
                     request(requested.get());
                 }
             }
-
             @Override
             protected void hookOnComplete() {
                 log.info("consumer: completed");
             }
-
             @Override
             protected void hookFinally(SignalType type) {
                 log.info("consumer: finaled, signalType: {}", type);
