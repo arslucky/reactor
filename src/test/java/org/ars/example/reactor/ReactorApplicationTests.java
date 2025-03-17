@@ -176,7 +176,7 @@ class ReactorApplicationTests {
                 .verifyComplete();
     }
 
-    class SequenceCreator {
+    static class SequenceCreator {
         void multiThreadSource(Integer elementsToEmit, FluxSink<Integer> sharedSink) {
             var thread1 = new Thread(() -> emitElements(sharedSink, elementsToEmit/2), "Thread_1");
             var thread2 = new Thread(() -> emitElements(sharedSink, elementsToEmit/2), "Thread_2");
