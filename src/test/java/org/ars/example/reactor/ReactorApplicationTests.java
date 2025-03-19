@@ -162,7 +162,7 @@ class ReactorApplicationTests {
                 .verifyComplete();
     }
     /**
-    Test has to be failed as push operator is allowed for single thread processing
+    Test has to be failed as push operator is only allowed for single thread processing
      @see <a href="https://projectreactor.io/docs/core/release/api/"/>
      @see <a href="https://stackoverflow.com/questions/58480997/what-is-the-difference-between-flux-create-vs-flux-push-in-project-reactor"/>
      */
@@ -210,7 +210,7 @@ class ReactorApplicationTests {
             var arr = new Integer[] {10,20,30,40,50};
 
             var counter = new AtomicInteger();
-            sink.onRequest(countOfRequestedItems -> {
+            sink.onRequest(countOfRequestedItems -> { //TODO: Flux.push doesn't work as expected, countOfRequestedItems set to 9223372036854775807 Long.MAX_VALUE instead of remained/requested 1
                 log.info("producer: requested of items: {}", countOfRequestedItems);
                 for(var i = 1; i <= countOfRequestedItems; i++) {
                     if (counter.get() >= arr.length) {
