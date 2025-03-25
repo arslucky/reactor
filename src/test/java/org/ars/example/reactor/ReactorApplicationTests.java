@@ -254,4 +254,24 @@ class ReactorApplicationTests {
             .doOnRequest(r -> log.info("consumer: request of {} items", r))
             .subscribe(new SimpleSubscriber());
     }
+
+    @Test
+    void publishOn() {
+        var s = Schedulers.newParallel("parallel thread");
+        var flux = Flux.range(1,2)
+                .map(i -> {log.info("map1"); return i + 10;})
+                .publishOn(s)
+                .map(i -> {log.info("map2"); return "value" + i;});
+        flux.subscribe(log::info);
+    }
+
+    @Test
+    void subscribeOn() {
+        var s = Schedulers.newParallel("parallel thread");
+        var flux = Flux.range(1,2)
+                .map(i -> {log.info("map1"); return i + 10;})
+                .subscribeOn(s)
+                .map(i -> {log.info("map2"); return "value" + i;});
+        flux.subscribe(log::info);
+    }
 }
